@@ -21,6 +21,13 @@ public class EventoGeradorCliente extends ExternalEvent{
 	 * parâmetro showInTrace: é um flag que indica se o evento deve ou não
 	 *                        produzir saídas para um trace de saída da simulação.
 	 */      
+	Boolean isPool = false;
+
+	public EventoGeradorCliente(Model owner, String name, boolean showInTrace, boolean isPool) {
+		super (owner, name, showInTrace);
+		this.isPool = isPool;
+	}
+
 	public EventoGeradorCliente(Model owner, String name, boolean showInTrace) {
 		super (owner, name, showInTrace);
 	}
@@ -67,7 +74,7 @@ public class EventoGeradorCliente extends ExternalEvent{
 		 * O instante em que um novo cliente deve chegar à lavanderia é determinado, 
 		 * de acordo com a distribuição de probabilidade do tempo entre chegadas de clientes sucessivos.
 		 */
-		instanteChegadaCliente = modeloServidor.getTempoEntreChegadasClientes();
+		instanteChegadaCliente = modeloServidor.getTempoEntreChegadasClientes(this.isPool);
 		
 		// O evento correspondente à chegada do próximo cliente à lavanderia é criado.
 		eventoGeradorCliente = new EventoGeradorCliente (modeloServidor, "Evento externo responsável por gerar um cliente que chega à lavanderia", true);

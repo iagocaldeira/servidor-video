@@ -1,0 +1,168 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug (Launch) - Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Servidor<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "Servidor",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-ASMifier<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "co.paralleluniverse.asm.util.ASMifier",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-CheckClassAdapter<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "co.paralleluniverse.asm.util.CheckClassAdapter",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Textifier<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "co.paralleluniverse.asm.util.Textifier",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-InstrumentationTKB<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "co.paralleluniverse.fibers.instrument.InstrumentationTKB",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-ExperimentStarterApplet<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "desmoj.extensions.experimentation.ui.ExperimentStarterApplet",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-ExperimentStarterApplication<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "desmoj.extensions.experimentation.ui.ExperimentStarterApplication",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-LoadModelDialog<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "desmoj.extensions.experimentation.ui.LoadModelDialog",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-BatchRunner<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "desmoj.extensions.experimentation.util.BatchRunner",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Run<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "desmoj.extensions.experimentation.util.Run",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-TestFrame<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "desmoj.extensions.visualization2d.engine.TestFrame",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-WriteBsp0<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "desmoj.extensions.visualization2d.engine.WriteBsp0",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-WriteBspArztPraxis0<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "desmoj.extensions.visualization2d.engine.WriteBspArztPraxis0",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Command<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "desmoj.extensions.visualization2d.engine.command.Command",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-ViewerFrame<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "desmoj.extensions.visualization2d.engine.viewer.ViewerFrame",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-PNGReader<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "jxl.biff.drawing.PNGReader",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Demo<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "jxl.demo.Demo",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Constants<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "org.apache.xerces.impl.Constants",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Version<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "org.apache.xerces.impl.Version",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-XPath<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "org.apache.xerces.impl.xpath.XPath",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-REUtil<ServidorVideo>",
+            "request": "launch",
+            "mainClass": "org.apache.xerces.impl.xpath.regex.REUtil",
+            "projectName": "ServidorVideo"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Version<ServidorVideo>(1)",
+            "request": "launch",
+            "mainClass": "org.apache.xmlcommons.Version",
+            "projectName": "ServidorVideo"
+        }
+    ]
+}

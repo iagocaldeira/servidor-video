@@ -44,7 +44,6 @@ public class EventoTerminoDispositivo extends EventOf2Entities<Dispositivo, Clie
 		if(dispositivo.codigo == 0 || dispositivo.codigo == 1){
 			int valor = gerador.nextInt(101);
 			if(valor < 4){
-				System.out.println("Fui embora");
 				modeloServidor.liberarDispositivo(dispositivo, dispositivo.codigo, true); // LIBEROU PROCESSO 4%
 			}else if(valor < 64){
 				modeloServidor.liberarDispositivo(dispositivo, dispositivo.codigo, false);

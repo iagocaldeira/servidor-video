@@ -1,1 +1,11 @@
 *.html
+bin/*
+src/co/*
+src/com/*
+src/de/*
+src/desmoj/*
+src/javax/*
+src/jxl/*
+src/META-INF/*
+src/org/*
+src/*.class
