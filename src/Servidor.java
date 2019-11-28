@@ -17,7 +17,7 @@ public class Servidor extends Model{
 	private static double tempoTotalResposta = 0.0;
 
 	// Definição do tempo de simulação.
-	private static double tempoSimulacao = 60*24*7;
+	private static double tempoSimulacao = 60*1000;
 	
 	/**
 	 * filaClientes: variável responsável por armazenar todos os clientes
@@ -194,23 +194,34 @@ public class Servidor extends Model{
 	 * lavarem suas roupas é criado e escalonado para ocorrer logo no início da simulação. 
      */
 	public void doInitialSchedules() {
-		for (int i = 0; i < 1; i++) {
-			this.gerarClientes();
+		this.gerarPrimeiroCliente();
+		for (int i = 0; i < 100; i++) {
+			this.gerarClientes(false);
 		}
 	}
 	
-	public void gerarClientes() {
-		for (int i = 0; i < 100; i++) {
-			EventoGeradorCliente eventoGeradorCliente;
-			
-			eventoGeradorCliente = new EventoGeradorCliente (this, "Evento externo responsável por gerar um cliente que chega à lavanderia", true);
-			
-			/**
-			 * Escalona o evento externo "eventoGeradorCliente" para ocorrer em um ponto específico da simulação.
-			 * Nesse caso, o evento externo deverá ocorrer logo no início da simulação.
-			 */
-			eventoGeradorCliente.schedule(new TimeSpan(0.0));
-		}
+	public void gerarPrimeiroCliente() {
+		EventoGeradorCliente eventoGeradorCliente;
+		
+		eventoGeradorCliente = new EventoGeradorCliente (this, "Evento externo responsável por gerar um cliente que chega à lavanderia", true);
+		
+		/**
+		 * Escalona o evento externo "eventoGeradorCliente" para ocorrer em um ponto específico da simulação.
+		 * Nesse caso, o evento externo deverá ocorrer logo no início da simulação.
+		 */
+		eventoGeradorCliente.schedule(new TimeSpan(0.0));
+	}
+	
+	public void gerarClientes(boolean isPool) {
+		EventoGeradorCliente eventoGeradorCliente;
+		
+		double instanteChegadaCliente = this.getTempoEntreChegadasClientes(isPool);
+				
+		// O evento correspondente à chegada do próximo cliente à lavanderia é criado.
+		eventoGeradorCliente = new EventoGeradorCliente (this, "Evento externo responsável por gerar um cliente que chega à lavanderia", true);
+		// E a chegada desse próximo cliente é escalonada.
+		eventoGeradorCliente.schedule (new TimeSpan(instanteChegadaCliente));
+
 	}
 	
 	/**
@@ -287,42 +298,36 @@ public class Servidor extends Model{
 	 * essa é realocada ao primeiro cliente da fila de espera.
 	 */
 	public void liberarDispositivo(Dispositivo dispositivo, int indexDoRecurso, boolean liberar) {
-		if (liberar) {
-			EventoGeradorCliente eventoGeradorCliente;
-			eventoGeradorCliente = new EventoGeradorCliente(this,
-					"Evento externo responsável por gerar um cliente que chega à lavanderia", true, true);
-			// 750 de thinktime
-			eventoGeradorCliente.schedule(new TimeSpan(750.0));
+		Cliente cliente;
+		
+		sendTraceNote("Liberando dispositivo...");
+		contadorUtilizacao++;
+		tempoLavandoTotal += dispositivo.ultimoTempoLavando;
+		tempoTotalResposta += this.presentTime().getTimeAsDouble() - dispositivo.cliente.inicioTempoResposta;
+		
+		// Verifica se existe algum cliente aguardando na fila de espera para utilizar a máquina de lavar.
+		if (conjuntoDeFilas.get(indexDoRecurso).isEmpty()){
+			
+			/**
+			 * Caso não exista nenhum cliente aguardando para utilizar a máquina de lavar roupas,
+			 * essa é liberada.
+			 */
+			sendTraceNote("Dispositivo esperando clientes...");
+			dispositivo.setOcupada(false);
+			
+		}else{
+			sendTraceNote("Dispositivo será realocada.");
+			
+			// O primeiro cliente da fila de espera para utilizar a máquina de lavar é retirado dessa fila.
+			Queue<Cliente> filinha = conjuntoDeFilas.get(indexDoRecurso);
+			cliente = filinha.first();
+			filinha.remove(cliente);
+			
+			// Utilização da máquina de lavar-roupas pelo primeiro cliente da fila de espera.
+			dispositivo.lavar(cliente, indexDoRecurso);
 		}
-		else{
-			Cliente cliente;
-			
-			sendTraceNote("Liberando dispositivo...");
-			contadorUtilizacao++;
-			tempoLavandoTotal += dispositivo.ultimoTempoLavando;
-			tempoTotalResposta += this.presentTime().getTimeAsDouble() - dispositivo.cliente.inicioTempoResposta;
-			
-			// Verifica se existe algum cliente aguardando na fila de espera para utilizar a máquina de lavar.
-			if (conjuntoDeFilas.get(indexDoRecurso).isEmpty()){
-				
-				/**
-				 * Caso não exista nenhum cliente aguardando para utilizar a máquina de lavar roupas,
-				 * essa é liberada.
-				 */
-				sendTraceNote("Dispositivo esperando clientes...");
-				dispositivo.setOcupada(false);
-				
-			}else{
-				sendTraceNote("Dispositivo será realocada.");
-				
-				// O primeiro cliente da fila de espera para utilizar a máquina de lavar é retirado dessa fila.
-				Queue<Cliente> filinha = conjuntoDeFilas.get(indexDoRecurso);
-				cliente = filinha.first();
-				filinha.remove(cliente);
-				
-				// Utilização da máquina de lavar-roupas pelo primeiro cliente da fila de espera.
-				dispositivo.lavar(cliente, indexDoRecurso);
-			}
+		if (liberar) {
+			this.gerarClientes(true);
 		}
 
 	}

@@ -61,7 +61,6 @@ public class EventoGeradorCliente extends ExternalEvent{
 		
 		// O cliente que chegou à lavanderia deve ser servido.
 
-
 		Random gerador = new Random();
 		if(gerador.nextInt(101) < 68){
 			modeloServidor.servirCliente(cliente, 0); // cpu um
@@ -74,11 +73,11 @@ public class EventoGeradorCliente extends ExternalEvent{
 		 * O instante em que um novo cliente deve chegar à lavanderia é determinado, 
 		 * de acordo com a distribuição de probabilidade do tempo entre chegadas de clientes sucessivos.
 		 */
-		instanteChegadaCliente = modeloServidor.getTempoEntreChegadasClientes(this.isPool);
+		//instanteChegadaCliente = modeloServidor.getTempoEntreChegadasClientes(this.isPool);
 		
 		// O evento correspondente à chegada do próximo cliente à lavanderia é criado.
-		eventoGeradorCliente = new EventoGeradorCliente (modeloServidor, "Evento externo responsável por gerar um cliente que chega à lavanderia", true);
+		//eventoGeradorCliente = new EventoGeradorCliente (modeloServidor, "Evento externo responsável por gerar um cliente que chega à lavanderia", true);
 		// E a chegada desse próximo cliente é escalonada.
-		eventoGeradorCliente.schedule (new TimeSpan(instanteChegadaCliente));
+		//eventoGeradorCliente.schedule (new TimeSpan(instanteChegadaCliente));
 	}
 }
