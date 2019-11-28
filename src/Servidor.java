@@ -17,7 +17,8 @@ public class Servidor extends Model{
 	private static double tempoTotalResposta = 0.0;
 
 	// Definição do tempo de simulação.
-	private static double tempoSimulacao = 60*60*1000;
+	private static double tempoSimulacao = 10;
+	private static TimeUnit unidadeSimulacao = TimeUnit.HOURS;
 	
 	/**
 	 * filaClientes: variável responsável por armazenar todos os clientes
@@ -362,10 +363,11 @@ public static void main(String[] args) {
 		
 		// Indica quando a simulação deve ser interrompida.
 		// Em nossa simulação, a unidade de tempo será um minuto. 
-		experimento.stop(new TimeInstant(tempoSimulacao));   
-		   
+		experimento.stop(new TimeInstant(tempoSimulacao, unidadeSimulacao));
+
 		// Indica o período durante o qual as informações da simulação devem ser armazenadas no trace da simulação.
-		experimento.tracePeriod(new TimeInstant(0.0), new TimeInstant(tempoSimulacao));
+		// set the period of the trace
+		experimento.tracePeriod(new TimeInstant(0), new TimeInstant(tempoSimulacao, unidadeSimulacao));
 		
 		// Inicia o experimento no instante zero da simulação.
 		experimento.start();
