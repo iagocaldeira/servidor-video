@@ -9,3 +9,5 @@ src/jxl/*
 src/META-INF/*
 src/org/*
 src/*.class
+*.log
+debug.log

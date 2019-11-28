@@ -17,7 +17,7 @@ public class Servidor extends Model{
 	private static double tempoTotalResposta = 0.0;
 
 	// Definição do tempo de simulação.
-	private static double tempoSimulacao = 60*1000;
+	private static double tempoSimulacao = 60*60*1000;
 	
 	/**
 	 * filaClientes: variável responsável por armazenar todos os clientes
@@ -45,6 +45,10 @@ public class Servidor extends Model{
 	 * Será usada uma distribuição uniforme, com valores entre 20 e 40 minutos.
 	 */
 	private ContDistUniform distribuicaoTempoServicoMaquinaLavar;
+	private ContDistUniform distribuicaoTempoProcessador1;
+	private ContDistExponential distribuicaoTempoProcessador2;
+	private ContDistExponential distribuicaoTempoDiscoRapido; 
+	private ContDistUniform distribuicaoTempoDiscoLento; 
 	
 	/**
 	    * Método construtor da Lavanderia.
@@ -172,14 +176,19 @@ public class Servidor extends Model{
 	     * Flag que indica se a distribuição deve ou não produzir saídas para um trace de saída.
 	     */
 		
-		distribuicaoTempoServicoMaquinaLavar = new ContDistUniform (this, "Distribuição do tempo de serviço da máquina de lavar roupas", 20.0, 40.0, true, true);
-		
+		distribuicaoTempoProcessador1 = new ContDistUniform (this, "Distribuição do tempo de serviço do CPU 1", 0.0, 35.0, true, true);
+		distribuicaoTempoProcessador2 =  new ContDistExponential (this, "Distribuição do tempo de serviço do CPU 2", 750.0, true, true);
+		distribuicaoTempoDiscoRapido =  new ContDistExponential (this, "Distribuição do tempo de serviço do Disco Rapido", 40.0, true, true);
+		distribuicaoTempoDiscoLento = new ContDistUniform (this, "Distribuição do tempo de serviço do Disco lento", 15.0, 19.0, true, true);
+		distribuicaoTempoProcessador1.setNonNegative(true);
+		distribuicaoTempoProcessador2.setNonNegative(true);
+		distribuicaoTempoDiscoRapido.setNonNegative(true);
+		distribuicaoTempoDiscoLento.setNonNegative(true);
 		/**
 		 * Método que indica se os valores gerados por essa distribuição de probabilidade podem ser negativos ou apenas positivos.
 		 * 
 		 * Nesse caso, como o flag foi setado para "true", a distribuição deverá retornar apenas valores positivos.
 		 */
-		distribuicaoTempoServicoMaquinaLavar.setNonNegative(true);
 	}
 	
 	@Override
@@ -242,17 +251,15 @@ public class Servidor extends Model{
 	 * o tempo de serviço da máquina de lavar-roupas.
 	 */
 	public double getTempoLavagem(int listIndex) {
-		
 		switch (listIndex) {
 		case 0:
-			return 0.002;
+			return distribuicaoTempoProcessador1.sample();
 		case 1:
-			return 0.002;
+			return distribuicaoTempoProcessador2.sample();
 		case 2:
-			return 0.002;
+			return  distribuicaoTempoDiscoRapido.sample();
 		case 3:
-			return 0.004;
-			
+			return  distribuicaoTempoDiscoLento.sample();
 		}
 		return 0;
 		//return (distribuicaoTempoServicoMaquinaLavar.sample());	
