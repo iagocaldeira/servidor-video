@@ -8,6 +8,6 @@ src/javax/*
 src/jxl/*
 src/META-INF/*
 src/org/*
-src/*.class
+*.class
 *.log
 debug.log
