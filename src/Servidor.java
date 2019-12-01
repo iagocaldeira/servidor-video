@@ -11,7 +11,12 @@ import java.util.concurrent.TimeUnit;
 
 public class Servidor extends Model{
 	
-	private static int contadorUtilizacao = 0;
+	private static int contadorClientesGerados = 0;
+
+	private static int contadorLiberacaoCpu1 = 0;
+	private static int contadorLiberacaoCpu2 = 0;
+	private static int contadorLiberacaoDRapido = 0;
+	private static int contadorLiberacaoDLento = 0;
 
 	private static double tempoLavandoTotal = 0.0;
 	private static double tempoTotalResposta = 0.0;
@@ -223,6 +228,8 @@ public class Servidor extends Model{
 	}
 	
 	public void gerarClientes(boolean isPool) {
+		contadorClientesGerados++;
+
 		EventoGeradorCliente eventoGeradorCliente;
 		
 		double instanteChegadaCliente = this.getTempoEntreChegadasClientes(isPool);
@@ -231,7 +238,6 @@ public class Servidor extends Model{
 		eventoGeradorCliente = new EventoGeradorCliente (this, "Evento externo responsável por gerar um cliente que chega à lavanderia", true);
 		// E a chegada desse próximo cliente é escalonada.
 		eventoGeradorCliente.schedule (new TimeSpan(instanteChegadaCliente));
-
 	}
 	
 	/**
@@ -309,7 +315,15 @@ public class Servidor extends Model{
 		Cliente cliente;
 		
 		sendTraceNote("Liberando dispositivo...");
-		contadorUtilizacao++;
+		
+		switch (indexDoRecurso) {
+			case 0: contadorLiberacaoCpu1++; break;
+			case 1: contadorLiberacaoCpu2++; break;
+			case 2: contadorLiberacaoDRapido++; break;
+			case 3: contadorLiberacaoDLento++; break;
+			default: break;
+		}
+
 		tempoLavandoTotal += dispositivo.ultimoTempoLavando;
 		tempoTotalResposta += this.presentTime().getTimeAsDouble() - dispositivo.cliente.inicioTempoResposta;
 		
@@ -385,14 +399,26 @@ public static void main(String[] args) {
 
 		Double tempoTotal = experimento.getStopTime().getTimeAsDouble();
 
+		System.out.println("Contador de requisições : "+contadorClientesGerados);
+		System.out.println("Contador de cpu1 : "+contadorLiberacaoCpu1);
+		System.out.println("Contador de cpu2 : "+contadorLiberacaoCpu2);
+		System.out.println("Contador de Disco Rapido : "+contadorLiberacaoDRapido);
+		System.out.println("Contador de Disco Lento : "+contadorLiberacaoDLento);
+
+		String questaoUm = "";
+
+		questaoUm += "Cpu 1;"+(contadorLiberacaoCpu1/contadorClientesGerados)+";\n";
+		questaoUm += "Cpu 2;"+(contadorLiberacaoCpu2/contadorClientesGerados)+";\n";
+		questaoUm += "Disco Rapido;"+(contadorLiberacaoDRapido/contadorClientesGerados)+";\n";
+		questaoUm += "Disco Lento;"+(contadorLiberacaoDLento/contadorClientesGerados)+";\n";
+
 		// taxa de processamento
 		// troughput : tempo de simulação em relação a quantidade de clientes que sairam (resposta)
-		
-	/* 	System.out.println("Contador de saída : "+contadorUtilizacao);
 		System.out.println("Tempo final do experimento : "+ tempoTotal);
-		System.out.println("Troughput : "+(contadorUtilizacao/tempoTotal)+" clientes por minuto");
+
+		/* System.out.println("Troughput : "+(contadorLiberacao/tempoTotal)+" clientes por minuto"); */
 		System.out.println("");
-		System.out.println(""); */
+		System.out.println("");
 
 		// utilização
 		// tempo que ficou ocupado - tempo de lavagem / tempo total (só somar quando acabar);
@@ -405,9 +431,9 @@ public static void main(String[] args) {
 
 		// tempo médio de resposta
 
-	/* 	System.out.println("Contador de saída : "+contadorUtilizacao);
+	/* 	System.out.println("Contador de saída : "+contadorLiberacao);
 		System.out.println("Tempo final do experimento : "+ tempoTotalResposta);
-		System.out.println("Tempo de resposta médio : "+(tempoTotalResposta/contadorUtilizacao)+"");
+		System.out.println("Tempo de resposta médio : "+(tempoTotalResposta/contadorLiberacao)+"");
 		System.out.println("");
 		System.out.println(""); */
 
@@ -415,6 +441,7 @@ public static void main(String[] args) {
 		System.out.println("_____________");
 		System.out.println("");
 
+		EscreveArquivo.preparaArquivo(questaoUm,"","","","","","","","");
 	}
 
 }
