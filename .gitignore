@@ -10,5 +10,4 @@ src/META-INF/*
 src/org/*
 *.class
 *.log
-*.csv
 debug.log

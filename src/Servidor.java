@@ -11,19 +11,30 @@ import java.util.concurrent.TimeUnit;
 
 public class Servidor extends Model{
 	
-	private static int contadorClientesGerados = 0;
+	public int quantidadeClientesPool = 1;
+	public int contadorClientesGerados = 0;
 
-	private static int contadorLiberacaoCpu1 = 0;
-	private static int contadorLiberacaoCpu2 = 0;
-	private static int contadorLiberacaoDRapido = 0;
-	private static int contadorLiberacaoDLento = 0;
+	public int contadorVisitacaoCpu1 = 0;
+	public int contadorVisitacaoCpu2 = 0;
+	public int contadorVisitacaoDRapido = 0;
+	public int contadorVisitacaoDLento = 0;
+	public int contadorVisitacao = 0;
 
-	private static double tempoLavandoTotal = 0.0;
-	private static double tempoTotalResposta = 0.0;
+
+	public int contadorLiberacaoCpu1 = 0;
+	public int contadorLiberacaoCpu2 = 0;
+	public int contadorLiberacaoDRapido = 0;
+	public int contadorLiberacaoDLento = 0;
+
+
+	public double tempoLavandoTotal = 0.0;
+	public double tempoLavandoD[] = { 0.0, 0.0, 0.0, 0.0};
+	public double tempoTotalResposta = 0.0;
+
 
 	// Definição do tempo de simulação.
-	private static double tempoSimulacao = 10;
-	private static TimeUnit unidadeSimulacao = TimeUnit.HOURS;
+	public double tempoSimulacao = 24;
+	public TimeUnit unidadeSimulacao = TimeUnit.HOURS;
 	
 	/**
 	 * filaClientes: variável responsável por armazenar todos os clientes
@@ -38,23 +49,31 @@ public class Servidor extends Model{
 	 * clientes à lavanderia.
 	 * Será usada uma distribuição exponencial, com média de 40 minutos.
 	 */
-	private ContDistExponential distribuicaoTempoChegadasClientes;
+	public ContDistExponential distribuicaoTempoChegadasClientes;
 
 	/**
 	 * distribuicaoTempoChegadasClientesPool 750ms
 	 */
-	private ContDistExponential distribuicaoTempoChegadasClientesPool;
+	public ContDistExponential distribuicaoTempoChegadasClientesPool;
 	
 	/**
 	 * distribuicaoTempoServicoMaquinaLavar: distribuição do tempo de serviço da máquina de lavar, ou seja,
 	 * do tempo gasto pela máquina de lavar para servir (lavar as roupas) os clientes da lavanderia.
 	 * Será usada uma distribuição uniforme, com valores entre 20 e 40 minutos.
 	 */
-	private ContDistUniform distribuicaoTempoServicoMaquinaLavar;
-	private ContDistUniform distribuicaoTempoProcessador1;
-	private ContDistExponential distribuicaoTempoProcessador2;
-	private ContDistExponential distribuicaoTempoDiscoRapido; 
-	private ContDistUniform distribuicaoTempoDiscoLento; 
+	public ContDistUniform distribuicaoTempoServicoMaquinaLavar;
+	public ContDistUniform distribuicaoTempoProcessador1;
+	public double totalTempoDistribuicaoProcessador1 = 0;
+	public double qtdTempoDistribuicaoProcessador1 = 0;
+	public ContDistExponential distribuicaoTempoProcessador2;
+	public double totalTempoDistribuicaoProcessador2 = 0;
+	public double qtdTempoDistribuicaoProcessador2 = 0;
+	public ContDistExponential distribuicaoTempoDiscoRapido;
+	public double totalTempoDistribuicaoDiscoRapido = 0; 
+	public double qtdTempoDistribuicaoDiscoRapido = 0; 
+	public ContDistUniform distribuicaoTempoDiscoLento;
+	public double totalTempoDistribuicaoDiscoLento = 0; 
+	public double qtdTempoDistribuicaoDiscoLento = 0; 
 	
 	/**
 	    * Método construtor da Lavanderia.
@@ -123,7 +142,7 @@ public class Servidor extends Model{
 	     * Flag que indica se a fila deve ou não produzir saídas para um trace de saída.
 	     */
 
-	  Queue cpuum = new Queue<Cliente> (this, "Fila de cpu um aguardando serviço", true, true);
+	  Queue cpuum = new Queue<Cliente>(this, "Fila de cpu um aguardando serviço", true, true);
 		conjuntoDeFilas.add(cpuum);
 	  Queue cpudois = new Queue<Cliente> (this, "Fila de cpu dois aguardando serviço", true, true);
 		conjuntoDeFilas.add(cpudois);
@@ -183,9 +202,9 @@ public class Servidor extends Model{
 	     */
 		
 		distribuicaoTempoProcessador1 = new ContDistUniform (this, "Distribuição do tempo de serviço do CPU 1", 0.0, 35.0, true, true);
-		distribuicaoTempoProcessador2 =  new ContDistExponential (this, "Distribuição do tempo de serviço do CPU 2", 750.0, true, true);
+		distribuicaoTempoProcessador2 =  new ContDistExponential (this, "Distribuição do tempo de serviço do CPU 2", 25.0, true, true);
 		distribuicaoTempoDiscoRapido =  new ContDistExponential (this, "Distribuição do tempo de serviço do Disco Rapido", 40.0, true, true);
-		distribuicaoTempoDiscoLento = new ContDistUniform (this, "Distribuição do tempo de serviço do Disco lento", 15.0, 19.0, true, true);
+		distribuicaoTempoDiscoLento = new ContDistUniform (this, "Distribuição do tempo de serviço do Disco lento", 15.0, 90.0, true, true);
 		distribuicaoTempoProcessador1.setNonNegative(true);
 		distribuicaoTempoProcessador2.setNonNegative(true);
 		distribuicaoTempoDiscoRapido.setNonNegative(true);
@@ -209,8 +228,9 @@ public class Servidor extends Model{
 	 * lavarem suas roupas é criado e escalonado para ocorrer logo no início da simulação. 
      */
 	public void doInitialSchedules() {
-		this.gerarPrimeiroCliente();
-		for (int i = 0; i < 100; i++) {
+		//this.gerarPrimeiroCliente();
+		System.out.println(quantidadeClientesPool);
+		for (int i = 0; i < quantidadeClientesPool; i++) {
 			this.gerarClientes(false);
 		}
 	}
@@ -258,15 +278,32 @@ public class Servidor extends Model{
 	 * o tempo de serviço da máquina de lavar-roupas.
 	 */
 	public double getTempoLavagem(int listIndex) {
+		double tempoLocal = 0;
 		switch (listIndex) {
 		case 0:
-			return distribuicaoTempoProcessador1.sample();
+			tempoLocal = distribuicaoTempoProcessador1.sample();
+			totalTempoDistribuicaoProcessador1 += tempoLocal;
+			qtdTempoDistribuicaoProcessador1++;
+
+			return tempoLocal;
 		case 1:
-			return distribuicaoTempoProcessador2.sample();
+			tempoLocal = distribuicaoTempoProcessador2.sample();
+			totalTempoDistribuicaoProcessador2 += tempoLocal;
+			qtdTempoDistribuicaoProcessador2++;
+
+			return tempoLocal;
 		case 2:
-			return  distribuicaoTempoDiscoRapido.sample();
+			tempoLocal = distribuicaoTempoDiscoRapido.sample();
+			totalTempoDistribuicaoDiscoRapido += tempoLocal;
+			qtdTempoDistribuicaoDiscoRapido++;
+
+			return tempoLocal;
 		case 3:
-			return  distribuicaoTempoDiscoLento.sample();
+			tempoLocal = distribuicaoTempoDiscoLento.sample();
+			totalTempoDistribuicaoDiscoLento += tempoLocal;
+			qtdTempoDistribuicaoDiscoLento++;
+
+			return tempoLocal;
 		}
 		return 0;
 		//return (distribuicaoTempoServicoMaquinaLavar.sample());	
@@ -317,15 +354,15 @@ public class Servidor extends Model{
 		sendTraceNote("Liberando dispositivo...");
 		
 		switch (indexDoRecurso) {
-			case 0: contadorLiberacaoCpu1++; break;
-			case 1: contadorLiberacaoCpu2++; break;
-			case 2: contadorLiberacaoDRapido++; break;
-			case 3: contadorLiberacaoDLento++; break;
+			case 0: contadorVisitacaoCpu1++; break;
+			case 1: contadorVisitacaoCpu2++; break;
+			case 2: contadorVisitacaoDRapido++; break;
+			case 3: contadorVisitacaoDLento++; break;
 			default: break;
 		}
 
 		tempoLavandoTotal += dispositivo.ultimoTempoLavando;
-		tempoTotalResposta += this.presentTime().getTimeAsDouble() - dispositivo.cliente.inicioTempoResposta;
+		tempoLavandoD[indexDoRecurso] += dispositivo.ultimoTempoLavando;
 		
 		// Verifica se existe algum cliente aguardando na fila de espera para utilizar a máquina de lavar.
 		if (conjuntoDeFilas.get(indexDoRecurso).isEmpty()){
@@ -341,107 +378,94 @@ public class Servidor extends Model{
 			sendTraceNote("Dispositivo será realocada.");
 			
 			// O primeiro cliente da fila de espera para utilizar a máquina de lavar é retirado dessa fila.
-			Queue<Cliente> filinha = conjuntoDeFilas.get(indexDoRecurso);
-			cliente = filinha.first();
-			filinha.remove(cliente);
+			cliente = (Cliente)conjuntoDeFilas.get(indexDoRecurso).first();
+			conjuntoDeFilas.remove(cliente);
 			
 			// Utilização da máquina de lavar-roupas pelo primeiro cliente da fila de espera.
 			dispositivo.lavar(cliente, indexDoRecurso);
 		}
 		if (liberar) {
+			this.tempoTotalResposta += this.presentTime().getTimeAsDouble() - dispositivo.cliente.inicioTempoResposta;
+			this.contadorVisitacao++;
+			switch (indexDoRecurso) {
+			case 0: contadorLiberacaoCpu1++; break;
+			case 1: contadorLiberacaoCpu2++; break;
+			case 2: contadorLiberacaoDRapido++; break;
+			case 3: contadorLiberacaoDLento++; break;
+			default: break;
+		}
 			this.gerarClientes(true);
 		}
 
 	}
 	
-	
-
-
 public static void main(String[] args) {
 		Servidor modeloServidor;
 		Experiment experimento;
+		String nomeD1 = "Cpu 1;", nomeD2 = "Cpu 2;", nomeD3 = "Disco Rapido;", nomeD4 = "Disco Lento;";
+		Double visitaMediaD1 = 0.0, visitaMediaD2 = 0.0, visitaMediaD3 = 0.0, visitaMediaD4 = 0.0;
+		Double utilizacaoD1 = 0.0, utilizacaoD2 = 0.0, utilizacaoD3 = 0.0, utilizacaoD4 = 0.0;
+		Double filaD1 = 0.0, filaD2 = 0.0, filaD3 = 0.0, filaD4 = 0.0;
+		Double tempoProcessador1=0.0, tempoProcessador2=0.0, tempoDiscoRapido=0.0, tempoDiscoLento=0.0;
 
-		//Criação do modelo da lavanderia.
-		modeloServidor = new Servidor (null, "Modelo de um servidor de vídeos", true, true);
-		 
-		// Criação do experimento da lavanderia self-service.
-		experimento = new Experiment ("Experimento da servidor de vídeos");
+		String questao1 = "", questao2 = "", questao3 = "", questao4 = "", questao5 = "", questao6 = "", questao7a = "", questao7b = "", questao7c = "";
+
+		for (int i = 0; i <= 100; i++) {
+			modeloServidor = new Servidor (null, "Modelo de um servidor de vídeos", true, true);
+			modeloServidor.quantidadeClientesPool = i;
+			experimento = new Experiment ("Experimento da servidor de vídeos");
+			modeloServidor.connectToExperiment(experimento);
+			experimento.setShowProgressBar(false);
+			experimento.stop(new TimeInstant(modeloServidor.tempoSimulacao, modeloServidor.unidadeSimulacao));
+			experimento.tracePeriod(new TimeInstant(0), new TimeInstant(modeloServidor.tempoSimulacao, modeloServidor.unidadeSimulacao));
+			experimento.start();
+			experimento.report();
+			experimento.finish();
+			double tempoTotal = experimento.getStopTime().getTimeAsDouble(TimeUnit.SECONDS);
+
+			visitaMediaD1 = (double)modeloServidor.contadorVisitacaoCpu1/modeloServidor.contadorVisitacao;
+			visitaMediaD2 = (double)modeloServidor.contadorVisitacaoCpu2/modeloServidor.contadorVisitacao;
+			visitaMediaD3 = (double)modeloServidor.contadorVisitacaoDRapido/modeloServidor.contadorVisitacao;
+			visitaMediaD4 = (double)modeloServidor.contadorVisitacaoDLento/modeloServidor.contadorVisitacao;
+			
+			tempoProcessador1 = (modeloServidor.totalTempoDistribuicaoProcessador1 / modeloServidor.qtdTempoDistribuicaoProcessador1);
+			tempoProcessador2 = (modeloServidor.totalTempoDistribuicaoProcessador2 / modeloServidor.qtdTempoDistribuicaoProcessador2);
+			tempoDiscoRapido = (modeloServidor.totalTempoDistribuicaoDiscoRapido / modeloServidor.qtdTempoDistribuicaoDiscoRapido);
+			tempoDiscoLento = (modeloServidor.totalTempoDistribuicaoDiscoLento / modeloServidor.qtdTempoDistribuicaoDiscoLento);
+			utilizacaoD1 = modeloServidor.totalTempoDistribuicaoProcessador1/tempoTotal;
+			utilizacaoD2 = modeloServidor.totalTempoDistribuicaoProcessador2/tempoTotal;
+			utilizacaoD3 = modeloServidor.totalTempoDistribuicaoDiscoRapido/tempoTotal;
+			utilizacaoD4 = modeloServidor.totalTempoDistribuicaoDiscoLento/tempoTotal;
+			
+			
+			questao3 += i+ ";"+utilizacaoD1 + ";"+utilizacaoD2 + ";"+utilizacaoD3 + ";"+utilizacaoD4 + ";\n";
+			
+			System.out.println("--------");
+			// System.out.println(modeloServidor.tempoTotalResposta/ modeloServidor.contadorVisitacao);
+			System.out.println("--------");
+
+			// tempo médio de resposta do servidor de vídeos
+			questao4 += i + ";" + (modeloServidor.tempoTotalResposta / modeloServidor.contadorVisitacao) + ";\n";
+
+			// throughput médio do servidor de vídeos
+			double thinktime = 0.2083; // (750/360)
+			questao5 += i + ";" + (i / (modeloServidor.contadorVisitacao + thinktime)) + ";\n";
+
+			// tamanho médio das filas dos dispositivos 750 / 360
+			// questao6 += i + ";" + utilizacaoD1 + ";" + utilizacaoD2 + ";" + utilizacaoD3 + ";" + utilizacaoD4 + ";\n";
+		}
 		
-		// Conecta o modelo da lavanderia ao experimento.
-		modeloServidor.connectToExperiment(experimento);
-		   
-		// Determinação dos parâmetros do experimento:
+		questao1 +=  nomeD1+visitaMediaD1+";\n";
+		questao1 +=  nomeD2+visitaMediaD2+";\n";
+		questao1 +=  nomeD3+visitaMediaD3+";\n";
+		questao1 +=  nomeD4+visitaMediaD4+";\n";
 		
-		// Indica que, durante a simulação, uma barra de progresso deve ser mostrada.
-		experimento.setShowProgressBar(true);
-		
-		// Indica quando a simulação deve ser interrompida.
-		// Em nossa simulação, a unidade de tempo será um minuto. 
-		experimento.stop(new TimeInstant(tempoSimulacao, unidadeSimulacao));
+		questao2 += nomeD1 + tempoProcessador1 + ";\n";
+		questao2 += nomeD2 + tempoProcessador2 + ";\n";
+		questao2 += nomeD3 + tempoDiscoRapido + ";\n";
+		questao2 += nomeD4 + tempoDiscoLento + ";\n";
 
-		// Indica o período durante o qual as informações da simulação devem ser armazenadas no trace da simulação.
-		// set the period of the trace
-		experimento.tracePeriod(new TimeInstant(0), new TimeInstant(tempoSimulacao, unidadeSimulacao));
-		
-		// Inicia o experimento no instante zero da simulação.
-		experimento.start();
-
-		// Gera um relatório, e outros arquivos de saída, relacionados ao modelo conectado ao experimento.
-		experimento.report();
-
-		// Interrompe todos os eventos que ainda estão escalonados e fecha todos os arquivos de saída.
-		experimento.finish();
-
-
-		System.out.println("");
-		System.out.println("_____________");
-		System.out.println("");
-
-		Double tempoTotal = experimento.getStopTime().getTimeAsDouble();
-
-		System.out.println("Contador de requisições : "+contadorClientesGerados);
-		System.out.println("Contador de cpu1 : "+contadorLiberacaoCpu1);
-		System.out.println("Contador de cpu2 : "+contadorLiberacaoCpu2);
-		System.out.println("Contador de Disco Rapido : "+contadorLiberacaoDRapido);
-		System.out.println("Contador de Disco Lento : "+contadorLiberacaoDLento);
-
-		String questaoUm = "";
-
-		questaoUm += "Cpu 1;"+(contadorLiberacaoCpu1/contadorClientesGerados)+";\n";
-		questaoUm += "Cpu 2;"+(contadorLiberacaoCpu2/contadorClientesGerados)+";\n";
-		questaoUm += "Disco Rapido;"+(contadorLiberacaoDRapido/contadorClientesGerados)+";\n";
-		questaoUm += "Disco Lento;"+(contadorLiberacaoDLento/contadorClientesGerados)+";\n";
-
-		// taxa de processamento
-		// troughput : tempo de simulação em relação a quantidade de clientes que sairam (resposta)
-		System.out.println("Tempo final do experimento : "+ tempoTotal);
-
-		/* System.out.println("Troughput : "+(contadorLiberacao/tempoTotal)+" clientes por minuto"); */
-		System.out.println("");
-		System.out.println("");
-
-		// utilização
-		// tempo que ficou ocupado - tempo de lavagem / tempo total (só somar quando acabar);
-
-	/* 	System.out.println("Tempo total lavando (ocupado): "+tempoLavandoTotal);
-		System.out.println("Tempo final do experimento : "+ tempoTotal);
-		System.out.println("Utilização : "+ tempoLavandoTotal/tempoTotal);
-		System.out.println("");
-		System.out.println(""); */
-
-		// tempo médio de resposta
-
-	/* 	System.out.println("Contador de saída : "+contadorLiberacao);
-		System.out.println("Tempo final do experimento : "+ tempoTotalResposta);
-		System.out.println("Tempo de resposta médio : "+(tempoTotalResposta/contadorLiberacao)+"");
-		System.out.println("");
-		System.out.println(""); */
-
-		System.out.println("");
-		System.out.println("_____________");
-		System.out.println("");
-
-		EscreveArquivo.preparaArquivo(questaoUm,"","","","","","","","");
+		EscreveArquivo.preparaArquivo(questao1, questao2, questao3, questao4, questao5, questao6, questao7a, questao7b, questao7c);
 	}
 
 }

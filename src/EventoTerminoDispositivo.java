@@ -40,9 +40,8 @@ public class EventoTerminoDispositivo extends EventOf2Entities<Dispositivo, Clie
 		modeloServidor.sendTraceNote(dispositivo + " terminou a função do dispositivo.");
 		
 		// A máquina de lavar que foi utilizada pelo cliente para lavar suas roupas deve ser liberada.
-		Random gerador = new Random();
 		if(dispositivo.codigo == 0 || dispositivo.codigo == 1){
-			int valor = gerador.nextInt(101);
+			int valor = (int)(Math.random()*100);
 			if(valor < 4){
 				modeloServidor.liberarDispositivo(dispositivo, dispositivo.codigo, true); // LIBEROU PROCESSO 4%
 			}else if(valor < 64){
@@ -52,9 +51,8 @@ public class EventoTerminoDispositivo extends EventOf2Entities<Dispositivo, Clie
 				modeloServidor.liberarDispositivo(dispositivo, dispositivo.codigo, false);
 				modeloServidor.servirCliente(cliente, 3); // FOI PRA DISCO DOIS 36%
 			}
-			
 		}else{ // é um disco
-			if(gerador.nextInt(101) < 68){
+			if((int)(Math.random()*100) < 68){
 				modeloServidor.liberarDispositivo(dispositivo, dispositivo.codigo, false);
 				modeloServidor.servirCliente(cliente, 0); // FOI PRA CPU UM 68 %
 			}else{
